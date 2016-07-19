@@ -5,6 +5,7 @@ var canvas = document.createElement('canvas');
 var context = canvas.getContext('2d');
 
 var killCount = 0;
+var tick = 0;
 
 canvas.width = 512;
 canvas.height = 480;
@@ -42,27 +43,19 @@ addEventListener('keyup', function(event){
 
 function update(){
     if(keysDown[40]){
-        if(canMove(heroLocation, 2)){ //2
-            moveEntity(heroLocation, 2)
-        }
+        moveEntity(heroLocation, 5, 2)
     }
 
     if(keysDown[39]){
-        if(canMove(heroLocation, 1)){ //1
-            moveEntity(heroLocation, 1)
-        }
+        moveEntity(heroLocation, 5, 1)
     }
 
     if(keysDown[38]){
-        if(canMove(heroLocation, 0)){ //3
-            moveEntity(heroLocation, 0)
-        }
+        moveEntity(heroLocation, 5, 0)
     }
 
     if(keysDown[37]){
-        if(canMove(heroLocation, 3)){ //0
-            moveEntity(heroLocation, 3)
-        }
+        moveEntity(heroLocation, 5, 3)
     }
 
     hitGoblin();
@@ -73,9 +66,9 @@ function canMove(locSet, direction){
         case 0:
             return locSet.y - 5 >= 0;
         case 1:
-            return locSet.x + 5 + 32 < 512;
+            return locSet.x + 5 < 512;
         case 2:
-            return locSet.y + 5 + 32 < 480;
+            return locSet.y + 5 < 480;
         case 3:
             return locSet.x - 5 >= 0;
         default:
@@ -83,57 +76,77 @@ function canMove(locSet, direction){
     }
 }
 
-function moveEntity(entity, direction){
+function moveEntity(entity, magnitude, direction){
     switch(direction){
         case 0:
             if(canMove(entity, 0)){
-                entity.y -= 5;
+                entity.y -= magnitude;
+            }else{
+                entity.y = 480;
             }
 
             break;
         case 1:
             if(canMove(entity, 1)){
-                entity.x += 5;
+                entity.x += magnitude;
+            }else{
+                entity.x = 0;
             }
 
             break;
         case 2:
             if(canMove(entity, 2)){
-                entity.y += 5;
+                entity.y += magnitude;
+            }else{
+                entity.y = 0;
             }
 
             break;
         case 3:
             if(canMove(entity, 3)){
-                entity.x -= 5;
+                entity.x -= magnitude;
+            }else{
+                entity.x = 512;
             }
 
             break;
         case 4:
             if(canMove(entity, 0) && canMove(entity, 1)){
-                entity.x += 5;
-                entity.y -= 5;
+                entity.x += magnitude;
+                entity.y -= magnitude;
+            }else{
+                entity.x = 0;
+                entity.y = 512;
             }
 
             break;
         case 5:
             if(canMove(entity, 1) && canMove(entity, 2)){
-                entity.x += 5;
-                entity.y += 5;
+                entity.x += magnitude;
+                entity.y += magnitude;
+            }else{
+                entity.x = 0;
+                entity.y = 0;
             }
 
             break;
         case 6:
             if(canMove(entity, 2) && canMove(entity, 3)){
-                entity.x -= 5;
-                entity.y += 5;
+                entity.x -= magnitude;
+                entity.y += magnitude;
+            }else{
+                entity.x = 512;
+                entity.y = 0;
             }
 
             break;
         case 7:
             if(canMove(entity, 3) && canMove(entity, 0)){
-                entity.x -= 5;
-                entity.y -= 5;
+                entity.x -= magnitude;
+                entity.y -= magnitude;
+            }else{
+                entity.x = 512;
+                entity.y = 480;
             }
 
             break;
@@ -145,25 +158,26 @@ function moveGoblin(){
     var max = goblinFace + 1;
 
     if(min < 0){
-        min = 3;
+        min = 7;
     }
 
-    if(min > 3){
+    if(min > 7){
         min = 0;
     }
 
     if(max < 0){
-        max = 3;
+        max = 7;
     }
 
-    if(max > 3){
+    if(max > 7){
         max = 0;
     }
 
-    var direction = getRandomInt(min, max);
-    moveEntity(goblinLocation, direction);
-    goblinFace = direction;
+    if(tick % 25 == 0){
+        goblinFace = getRandomInt(min, max);
+    }
 
+    moveEntity(goblinLocation, 4, goblinFace);
 }
 
 function hitGoblin(){
@@ -180,12 +194,13 @@ function hitGoblin(){
 }
 
 function getRandomInt(min, max){
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+    return Math.floor(Math.random() * (max - min) + 1) + min;
 }
 
 function draw(){
     update();
     moveGoblin();
+    tick++;
     context.drawImage(bgImage, 0, 0);
     context.drawImage(hero, heroLocation.x, heroLocation.y);
     context.drawImage(goblin, goblinLocation.x, goblinLocation.y);
