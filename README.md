@@ -9,4 +9,4 @@ A quick game where you attempt to catch the goblin
 ##Controls
 - Use UP/DOWN/LEFT/RIGHT to control your character. 
 
-http://i.imgur.com/fnoRlGg.png
+![alt text](http://i.imgur.com/fnoRlGg.png "Goblin Hunter")
