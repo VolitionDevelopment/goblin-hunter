@@ -15,21 +15,22 @@ document.body.appendChild(canvas);
 var bgImage = new Image();
 bgImage.src = 'assets/background.png';
 
-var hero = new Image();
-hero.src = 'assets/hero.png';
-var heroLocation = {
-    x: 100,
-    y: 100
+var hero = {
+    image: 'assets/hero.png',
+    location: {
+        x: 100,
+        y: 100
+    }
 };
 
-var goblin = new Image();
-goblin.src = 'assets/monster.png';
-var goblinLocation = {
-    x: 150,
-    y: 100
+var goblin = {
+    image: 'assets/monster.png',
+    location: {
+        x: 150,
+        y: 150
+    },
+    face: 0
 };
-var goblinFace = 0;
-
 
 var keysDown = [];
 
@@ -43,19 +44,19 @@ addEventListener('keyup', function(event){
 
 function update(){
     if(keysDown[40]){
-        moveEntity(heroLocation, 5, 2)
+        moveEntity(hero.location, 5, 2)
     }
 
     if(keysDown[39]){
-        moveEntity(heroLocation, 5, 1)
+        moveEntity(hero.location, 5, 1)
     }
 
     if(keysDown[38]){
-        moveEntity(heroLocation, 5, 0)
+        moveEntity(hero.location, 5, 0)
     }
 
     if(keysDown[37]){
-        moveEntity(heroLocation, 5, 3)
+        moveEntity(hero.location, 5, 3)
     }
 
     hitGoblin();
@@ -154,8 +155,8 @@ function moveEntity(entity, magnitude, direction){
 }
 
 function moveGoblin(){
-    var min = goblinFace - 1;
-    var max = goblinFace + 1;
+    var min = goblin.face - 1;
+    var max = goblin.face + 1;
 
     if(min < 0){
         min = 7;
@@ -174,20 +175,20 @@ function moveGoblin(){
     }
 
     if(tick % 25 == 0){
-        goblinFace = getRandomInt(min, max);
+        goblin.face = getRandomInt(min, max);
     }
 
-    moveEntity(goblinLocation, 4, goblinFace);
+    moveEntity(goblin.location, 4, goblin.face);
 }
 
 function hitGoblin(){
-    if((heroLocation.x <= goblinLocation.x + 32) &&
-        (heroLocation.y <= goblinLocation.y + 32) &&
-        (goblinLocation.x <= heroLocation.x + 32) &&
-        (goblinLocation.y <= heroLocation.y + 32)){
+    if((hero.location.x <= goblin.location.x + 32) &&
+        (hero.location.y <= goblin.location.y + 32) &&
+        (goblin.location.x <= hero.location.x + 32) &&
+        (goblin.location.y <= hero.location.y + 32)){
 
-        goblinLocation.x = Math.floor(Math.random() * 480);
-        goblinLocation.y = Math.floor(Math.random() * 458);
+        goblin.location.x = Math.floor(Math.random() * 480);
+        goblin.location.y = Math.floor(Math.random() * 458);
         killCount++;
         document.getElementById('counter').innerHTML = killCount;
     }
@@ -202,8 +203,14 @@ function draw(){
     moveGoblin();
     tick++;
     context.drawImage(bgImage, 0, 0);
-    context.drawImage(hero, heroLocation.x, heroLocation.y);
-    context.drawImage(goblin, goblinLocation.x, goblinLocation.y);
+
+    var heroImg = new Image();
+    heroImg.src = hero.image;
+    var goblinImg = new Image();
+    goblinImg.src = goblin.image;
+
+    context.drawImage(heroImg, hero.location.x, hero.location.y);
+    context.drawImage(goblinImg, goblin.location.x, goblin.location.y);
 
 
     requestAnimationFrame(draw);
