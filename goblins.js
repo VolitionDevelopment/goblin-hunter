@@ -27,6 +27,7 @@ var goblinLocation = {
     x: 150,
     y: 100
 };
+var goblinFace = 0;
 
 
 var keysDown = [];
@@ -41,46 +42,128 @@ addEventListener('keyup', function(event){
 
 function update(){
     if(keysDown[40]){
-        if(canMoveDown()){
-            heroLocation.y += 5;
+        if(canMove(heroLocation, 2)){ //2
+            moveEntity(heroLocation, 2)
         }
     }
 
-    if(canMoveRight()){
-        if(keysDown[39]){
-            heroLocation.x += 5;
+    if(keysDown[39]){
+        if(canMove(heroLocation, 1)){ //1
+            moveEntity(heroLocation, 1)
         }
     }
 
-    if(canMoveUp()){
-        if(keysDown[38]){
-            heroLocation.y -= 5;
+    if(keysDown[38]){
+        if(canMove(heroLocation, 0)){ //3
+            moveEntity(heroLocation, 0)
         }
     }
 
-    if(canMoveLeft()){
-        if(keysDown[37]){
-            heroLocation.x -= 5;
+    if(keysDown[37]){
+        if(canMove(heroLocation, 3)){ //0
+            moveEntity(heroLocation, 3)
         }
     }
 
     hitGoblin();
 }
 
-function canMoveLeft(){
-    return heroLocation.x - 5 >= 0;
+function canMove(locSet, direction){
+    switch(direction){
+        case 0:
+            return locSet.y - 5 >= 0;
+        case 1:
+            return locSet.x + 5 + 32 < 512;
+        case 2:
+            return locSet.y + 5 + 32 < 480;
+        case 3:
+            return locSet.x - 5 >= 0;
+        default:
+            return false;
+    }
 }
 
-function canMoveRight(){
-    return heroLocation.x + 5 + 32 < 512;
+function moveEntity(entity, direction){
+    switch(direction){
+        case 0:
+            if(canMove(entity, 0)){
+                entity.y -= 5;
+            }
+
+            break;
+        case 1:
+            if(canMove(entity, 1)){
+                entity.x += 5;
+            }
+
+            break;
+        case 2:
+            if(canMove(entity, 2)){
+                entity.y += 5;
+            }
+
+            break;
+        case 3:
+            if(canMove(entity, 3)){
+                entity.x -= 5;
+            }
+
+            break;
+        case 4:
+            if(canMove(entity, 0) && canMove(entity, 1)){
+                entity.x += 5;
+                entity.y -= 5;
+            }
+
+            break;
+        case 5:
+            if(canMove(entity, 1) && canMove(entity, 2)){
+                entity.x += 5;
+                entity.y += 5;
+            }
+
+            break;
+        case 6:
+            if(canMove(entity, 2) && canMove(entity, 3)){
+                entity.x -= 5;
+                entity.y += 5;
+            }
+
+            break;
+        case 7:
+            if(canMove(entity, 3) && canMove(entity, 0)){
+                entity.x -= 5;
+                entity.y -= 5;
+            }
+
+            break;
+    }
 }
 
-function canMoveDown(){
-    return heroLocation.y + 5 + 32 < 480;
-}
+function moveGoblin(){
+    var min = goblinFace - 1;
+    var max = goblinFace + 1;
 
-function canMoveUp(){
-    return heroLocation.y - 5 >= 0;
+    if(min < 0){
+        min = 3;
+    }
+
+    if(min > 3){
+        min = 0;
+    }
+
+    if(max < 0){
+        max = 3;
+    }
+
+    if(max > 3){
+        max = 0;
+    }
+
+    var direction = getRandomInt(min, max);
+    moveEntity(goblinLocation, direction);
+    goblinFace = direction;
+
 }
 
 function hitGoblin(){
@@ -96,12 +179,13 @@ function hitGoblin(){
     }
 }
 
-function moveGoblin(){
-
+function getRandomInt(min, max){
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function draw(){
     update();
+    moveGoblin();
     context.drawImage(bgImage, 0, 0);
     context.drawImage(hero, heroLocation.x, heroLocation.y);
     context.drawImage(goblin, goblinLocation.x, goblinLocation.y);
