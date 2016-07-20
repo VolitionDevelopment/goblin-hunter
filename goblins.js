@@ -242,6 +242,8 @@ function draw(){
         document.getElementById('count').innerHTML = mobs.length;
     }
 
+    document.getElementById('tick').innerHTML = tick;
+
     if(alive){
         requestAnimationFrame(draw);
     }
