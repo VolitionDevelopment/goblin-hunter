@@ -6,6 +6,7 @@ var context = canvas.getContext('2d');
 
 var killCount = 0;
 var tick = 0;
+var alive = true;
 
 canvas.width = 512;
 canvas.height = 480;
@@ -23,14 +24,16 @@ var hero = {
     }
 };
 
-var goblin = {
-    image: 'assets/monster.png',
-    location: {
-        x: 150,
-        y: 150
-    },
-    face: 0
-};
+var mobs = [
+    {
+        image: 'assets/monster.png',
+        location: {
+            x: 450,
+            y: 450
+        },
+        face: 0
+    }
+];
 
 var keysDown = [];
 
@@ -59,7 +62,7 @@ function update(){
         moveEntity(hero.location, 5, 3)
     }
 
-    hitGoblin();
+    hitMob();
 }
 
 function canMove(locSet, direction){
@@ -154,43 +157,51 @@ function moveEntity(entity, magnitude, direction){
     }
 }
 
-function moveGoblin(){
-    var min = goblin.face - 1;
-    var max = goblin.face + 1;
+function moveMob(){
+    for (var i = 0; i < mobs.length; i++) {
+        var mob = mobs[i];
 
-    if(min < 0){
-        min = 7;
+        var min = mob.face - 1;
+        var max = mob.face + 1;
+
+        if(min < 0){
+            min = 7;
+        }
+
+        if(min > 7){
+            min = 0;
+        }
+
+        if(max < 0){
+            max = 7;
+        }
+
+        if(max > 7){
+            max = 0;
+        }
+
+        if(tick % 25 == 0){
+            mob.face = getRandomInt(min, max);
+        }
+
+        moveEntity(mob.location, 3, mob.face);
     }
-
-    if(min > 7){
-        min = 0;
-    }
-
-    if(max < 0){
-        max = 7;
-    }
-
-    if(max > 7){
-        max = 0;
-    }
-
-    if(tick % 25 == 0){
-        goblin.face = getRandomInt(min, max);
-    }
-
-    moveEntity(goblin.location, 4, goblin.face);
 }
 
-function hitGoblin(){
-    if((hero.location.x <= goblin.location.x + 32) &&
-        (hero.location.y <= goblin.location.y + 32) &&
-        (goblin.location.x <= hero.location.x + 32) &&
-        (goblin.location.y <= hero.location.y + 32)){
+function hitMob(){
+    for (var i = 0; i < mobs.length; i++) {
+        var mob = mobs[i];
 
-        goblin.location.x = Math.floor(Math.random() * 480);
-        goblin.location.y = Math.floor(Math.random() * 458);
-        killCount++;
-        document.getElementById('counter').innerHTML = killCount;
+        if((hero.location.x <= mob.location.x + 32) &&
+            (hero.location.y <= mob.location.y + 32) &&
+            (mob.location.x <= hero.location.x + 32) &&
+            (mob.location.y <= hero.location.y + 32)){
+
+            mob.location.x = Math.floor(Math.random() * 480);
+            mob.location.y = Math.floor(Math.random() * 458);
+            document.getElementById('msg').innerHTML = "YOU DIED";
+            alive = false;
+        }
     }
 }
 
@@ -200,20 +211,40 @@ function getRandomInt(min, max){
 
 function draw(){
     update();
-    moveGoblin();
+    moveMob();
     tick++;
     context.drawImage(bgImage, 0, 0);
 
     var heroImg = new Image();
     heroImg.src = hero.image;
+
     var goblinImg = new Image();
-    goblinImg.src = goblin.image;
+    goblinImg.src = mobs[0].image;
 
     context.drawImage(heroImg, hero.location.x, hero.location.y);
-    context.drawImage(goblinImg, goblin.location.x, goblin.location.y);
 
+    for (var i = 0; i < mobs.length; i++) {
+        var mob = mobs[i];
+        context.drawImage(goblinImg, mob.location.x, mob.location.y);
+    }
 
-    requestAnimationFrame(draw);
+    if(tick % 500 == 0){
+        mobs.push({
+            image: 'assets/monster.png',
+            location: {
+                x: 450,
+                y: 450
+            },
+            face: 0
+        });
+
+        var count = parseInt(document.getElementById('count').innerHTML);
+        document.getElementById('count').innerHTML = mobs.length;
+    }
+
+    if(alive){
+        requestAnimationFrame(draw);
+    }
 }
 
 draw();
